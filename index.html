@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Chat App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: #111b21;
+      color: #fff;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .chat-app {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+    }
+    .sidebar {
+      width: 320px;
+      background: #202c33;
+      display: flex;
+      flex-direction: column;
+      border-right: 1.5px solid #222e35;
+    }
+    .sidebar-header {
+      padding: 18px 20px;
+      font-size: 1.3em;
+      font-weight: 600;
+      background: #222e35;
+      border-bottom: 1px solid #222e35;
+    }
+    .contacts {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .contact {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      cursor: pointer;
+      border-bottom: 1px solid #222e35;
+      transition: background 0.15s;
+    }
+    .contact.active, .contact:hover {
+      background: #2a3942;
+    }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #00adb5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #fff;
+    }
+    .contact-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .contact-name {
+      font-weight: 600;
+      font-size: 1.08em;
+    }
+    .contact-last {
+      font-size: 0.95em;
+      color: #b3b3b3;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #111b21;
+    }
+    .main-header {
+      height: 64px;
+      background: #202c33;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      border-bottom: 1px solid #222e35;
+      font-size: 1.15em;
+      font-weight: 600;
+      gap: 14px;
+    }
+    .main-header .avatar {
+      width: 38px;
+      height: 38px;
+      font-size: 1em;
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 24px 18px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #111b21;
+    }
+    .msg-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+    }
+    .msg-row.me {
+      justify-content: flex-end;
+    }
+    .msg {
+      max-width: 60vw;
+      background: #202c33;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 16px 16px 4px 16px;
+      font-size: 1.08em;
+      box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+      margin-bottom: 2px;
+      word-break: break-word;
+      transition: background 0.2s;
+    }
+    .msg-row.me .msg {
+      background: #00adb5;
+      color: #fff;
+      border-radius: 16px 16px 16px 4px;
+    }
+    .msg-time {
+      font-size: 0.85em;
+      color: #b3b3b3;
+      margin-left: 8px;
+      margin-right: 8px;
+      align-self: flex-end;
+    }
+    .msg-row.me .msg-time {
+      margin-left: 8px;
+      margin-right: 0;
+    }
+    .input-area {
+      display: flex;
+      align-items: center;
+      padding: 14px 24px;
+      background: #202c33;
+      border-top: 1px solid #222e35;
+      gap: 12px;
+    }
+    .input-box {
+      flex: 1;
+      background: #111b21;
+      color: #fff;
+      border: none;
+      border-radius: 18px;
+      padding: 10px 16px;
+      font-size: 1.08em;
+      outline: none;
+      transition: background 0.2s;
+    }
+    .send-btn {
+      background: #00adb5;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 1.3em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .send-btn:active {
+      background: #00777b;
+    }
+    @media (max-width: 900px) {
+      .sidebar { width: 80px; }
+      .sidebar-header { font-size: 1em; padding: 12px 8px; }
+      .contact-info { display: none; }
+      .contact { justify-content: center; }
+    }
+    @media (max-width: 700px) {
+      .chat-app { flex-direction: column; }
+      .sidebar { width: 100vw; height: 80px; flex-direction: row; border-right: none; border-bottom: 1.5px solid #222e35; }
+      .contacts { flex-direction: row; overflow-x: auto; overflow-y: hidden; }
+      .contact { flex-direction: column; border-bottom: none; border-right: 1px solid #222e35; }
+      .main { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-app">
+    <div class="sidebar">
+      <div class="sidebar-header">Live Chat</div>
+      <div class="contacts" id="contacts"></div>
+    </div>
+    <div class="main">
+      <div class="main-header" id="mainHeader">
+        <div class="avatar" id="mainAvatar">A</div>
+        <span id="mainName">Select a contact</span>
+      </div>
+      <div class="messages" id="messages"></div>
+      <form class="input-area" id="inputArea" autocomplete="off" style="display:none;">
+        <input class="input-box" id="msgInput" type="text" placeholder="Type a message..." autocomplete="off" />
+        <button class="send-btn" id="sendBtn" type="submit">➤</button>
+      </form>
+    </div>
+  </div>
+  <script>
+// --- Demo contacts ---
+const contacts = [
+  { id: 'alice', name: 'Alice', avatar: 'A', last: 'Hey! How are you?' },
+  { id: 'bob', name: 'Bob', avatar: 'B', last: 'Let\'s catch up soon.' },
+  { id: 'carol', name: 'Carol', avatar: 'C', last: 'See you at 7pm.' },
+  { id: 'dave', name: 'Dave', avatar: 'D', last: 'Project update?' },
+];
+let currentContact = null;
+let chatHistory = {};
+
+const contactsDiv = document.getElementById('contacts');
+const messagesDiv = document.getElementById('messages');
+const mainHeader = document.getElementById('mainHeader');
+const mainAvatar = document.getElementById('mainAvatar');
+const mainName = document.getElementById('mainName');
+const inputArea = document.getElementById('inputArea');
+const msgInput = document.getElementById('msgInput');
+
+// --- Render contacts ---
+function renderContacts() {
+  contactsDiv.innerHTML = '';
+  contacts.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'contact' + (currentContact && currentContact.id === c.id ? ' active' : '');
+    div.innerHTML = `<div class="avatar">${c.avatar}</div>
+      <div class="contact-info">
+        <span class="contact-name">${c.name}</span>
+        <span class="contact-last">${c.last}</span>
+      </div>`;
+    div.onclick = () => selectContact(c);
+    contactsDiv.appendChild(div);
+  });
+}
+
+function selectContact(c) {
+  currentContact = c;
+  mainAvatar.textContent = c.avatar;
+  mainName.textContent = c.name;
+  inputArea.style.display = '';
+  renderContacts();
+  renderMessages();
+  setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 50);
+}
+
+// --- Render messages ---
+function renderMessages() {
+  messagesDiv.innerHTML = '';
+  if (!currentContact) return;
+  const msgs = chatHistory[currentContact.id] || [];
+  msgs.forEach(m => {
+    const row = document.createElement('div');
+    row.className = 'msg-row' + (m.me ? ' me' : '');
+    row.innerHTML = `<div class="msg">${m.text}</div><div class="msg-time">${m.time}</div>`;
+    messagesDiv.appendChild(row);
+  });
+}
+
+
+// --- WebSocket Demo (echo server) ---
+// let ws = null;
+// function connectWS() {
+//   ws = new WebSocket('wss://ws.ifelse.io'); // Free echo server
+//   ws.onopen = () => {};
+//   ws.onmessage = e => {
+//     if (!currentContact) return;
+//     const msg = { text: e.data, me: false, time: new Date().toLocaleTimeString() };
+//     if (!chatHistory[currentContact.id]) chatHistory[currentContact.id] = [];
+//     chatHistory[currentContact.id].push(msg);
+//     renderMessages();
+//     setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 50);
+//   };
+//   ws.onclose = () => { setTimeout(connectWS, 2000); };
+// }
+// connectWS();
+
+// --- AI Chatbot (hidden, not shown as contact) ---
+// The AI will reply to your messages in any chat, but is not visible as a contact.
+async function aiReply(userMsg) {
+  // --- You can replace this with a real free API endpoint if available ---
+  // For demo, use a public endpoint or a placeholder response
+  // Example: Use OpenAI's free endpoints if you have an API key, or use a mock
+  // This demo uses a free public API (if available) or a simple mock
+  try {
+    // Example using a free endpoint (replace with your own if needed)
+    // const response = await fetch('https://api.affiliateplus.xyz/api/chatgpt?message=' + encodeURIComponent(userMsg));
+    // const data = await response.json();
+    // return data.reply || 'AI: Sorry, I could not process that.';
+    // --- Mock reply for demo ---
+    if (userMsg.toLowerCase().includes('hello')) return 'Hello! How can I help you today?';
+    if (userMsg.toLowerCase().includes('weather')) return 'The weather is sunny and bright!';
+    if (userMsg.toLowerCase().includes('joke')) return 'Why did the web developer go broke? Because he used up all his cache!';
+    return 'AI: ' + userMsg.split('').reverse().join('');
+  } catch {
+    return 'AI: Sorry, I could not process that.';
+  }
+}
+
+// --- Send message ---
+inputArea.onsubmit = async e => {
+  e.preventDefault();
+  const text = msgInput.value.trim();
+  if (!text || !currentContact) return;
+  const msg = { text, me: true, time: new Date().toLocaleTimeString() };
+  if (!chatHistory[currentContact.id]) chatHistory[currentContact.id] = [];
+  chatHistory[currentContact.id].push(msg);
+  renderMessages();
+  setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 50);
+  msgInput.value = '';
+
+  // --- AI reply (hidden, not shown as contact) ---
+  setTimeout(async () => {
+    const aiText = await aiReply(text);
+    const aiMsg = { text: aiText, me: false, time: new Date().toLocaleTimeString() };
+    chatHistory[currentContact.id].push(aiMsg);
+    renderMessages();
+    setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 50);
+  }, 800 + Math.random()*800);
+};
+
+// --- Initial render ---
+renderContacts();
+  </script>
+</body>
+</html>
